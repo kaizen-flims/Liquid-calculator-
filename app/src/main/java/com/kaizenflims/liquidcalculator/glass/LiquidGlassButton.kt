@@ -14,7 +14,7 @@ import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.matchParentSize
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -289,7 +289,7 @@ private fun GlassDepthOverlay(
 ) {
     Canvas(
         Modifier
-            .matchParentSize()
+            .fillMaxSize()
             .clip(shape),
     ) {
         val radius = size.minDimension / 2f

@@ -1,0 +1,56 @@
+uniform shader content;
+uniform float2 size;
+uniform float2 touch;
+uniform float press;
+uniform float intensity;
+uniform float corner;
+uniform float dispersion;
+
+float roundedBoxDistance(float2 point, float2 halfSize, float radius) {
+    float2 q = abs(point) - (halfSize - float2(radius));
+    return length(max(q, float2(0.0))) + min(max(q.x, q.y), 0.0) - radius;
+}
+
+half4 main(float2 coord) {
+    float2 center = size * 0.5;
+    float2 p = coord - center;
+    float safeLength = max(length(p), 0.001);
+    float2 radial = p / safeLength;
+
+    float distanceToShape = roundedBoxDistance(p, center, corner);
+    float innerDistance = max(-distanceToShape, 0.0);
+    float edgeWidth = max(min(size.x, size.y) * 0.31, 1.0);
+    float edge = 1.0 - smoothstep(0.0, edgeWidth, innerDistance);
+
+    float centerWeight = 1.0 - smoothstep(
+        0.0,
+        max(min(size.x, size.y) * 0.58, 1.0),
+        safeLength
+    );
+
+    // Sample slightly toward the optical center for magnification, then bend
+    // more strongly along the curved rim.
+    float2 lensShift = -radial * centerWeight * 2.6 * intensity;
+    lensShift += radial * edge * edge * 5.2 * intensity;
+
+    float2 pressureDelta = coord - touch;
+    float pressureRadius = max(min(size.x, size.y) * 0.34, 1.0);
+    float pressureFalloff = exp(
+        -dot(pressureDelta, pressureDelta) / (pressureRadius * pressureRadius)
+    );
+    float2 pressureDirection = pressureDelta / max(length(pressureDelta), 1.0);
+    lensShift += pressureDirection * pressureFalloff * press * 5.6;
+    lensShift += (touch - center) / max(size, float2(1.0)) * press * pressureFalloff * 1.5;
+
+    float2 samplePoint = clamp(
+        coord + lensShift,
+        float2(1.0),
+        max(size - float2(2.0), float2(1.0))
+    );
+
+    float chroma = edge * dispersion * (0.32 + press * 0.18);
+    half4 base = content.eval(samplePoint);
+    half red = content.eval(clamp(samplePoint + radial * chroma, float2(1.0), size - float2(2.0))).r;
+    half blue = content.eval(clamp(samplePoint - radial * chroma, float2(1.0), size - float2(2.0))).b;
+    return half4(red, base.g, blue, base.a);
+}

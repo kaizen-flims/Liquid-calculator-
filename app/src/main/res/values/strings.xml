@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Liquid Calculator</string>
+    <string name="history">Calculation history</string>
+    <string name="settings">Appearance settings</string>
+    <string name="choose_wallpaper">Choose wallpaper</string>
+    <string name="clear_history">Clear history</string>
+</resources>
+

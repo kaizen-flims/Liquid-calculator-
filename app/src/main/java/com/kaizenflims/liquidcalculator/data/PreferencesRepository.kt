@@ -11,29 +11,41 @@ import com.kaizenflims.liquidcalculator.glass.GlassTheme
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
+internal object PreferenceKeys {
+    val glassIntensity = floatPreferencesKey("glass_intensity")
+    val motionEffects = booleanPreferencesKey("motion_effects")
+    val haptics = booleanPreferencesKey("haptics")
+    val quality = stringPreferencesKey("glass_quality")
+    val theme = stringPreferencesKey("glass_theme")
+    val wallpaperUri = stringPreferencesKey("wallpaper_uri")
+    val wallpaperZoom = floatPreferencesKey("wallpaper_zoom")
+    val wallpaperOffsetX = floatPreferencesKey("wallpaper_offset_x")
+    val wallpaperOffsetY = floatPreferencesKey("wallpaper_offset_y")
+}
+
 class PreferencesRepository(
     private val store: DataStore<Preferences>,
 ) {
     val preferences: Flow<AppPreferences> = store.data.map(::decode)
 
     suspend fun setGlassIntensity(value: Float) = store.edit {
-        it[Keys.glassIntensity] = value.coerceIn(0.25f, 1f)
+        it[PreferenceKeys.glassIntensity] = value.coerceIn(0.25f, 1f)
     }
 
     suspend fun setMotionEffects(enabled: Boolean) = store.edit {
-        it[Keys.motionEffects] = enabled
+        it[PreferenceKeys.motionEffects] = enabled
     }
 
     suspend fun setHaptics(enabled: Boolean) = store.edit {
-        it[Keys.haptics] = enabled
+        it[PreferenceKeys.haptics] = enabled
     }
 
     suspend fun setQuality(quality: GlassQuality) = store.edit {
-        it[Keys.quality] = quality.name
+        it[PreferenceKeys.quality] = quality.name
     }
 
     suspend fun setTheme(theme: GlassTheme) = store.edit {
-        it[Keys.theme] = theme.name
+        it[PreferenceKeys.theme] = theme.name
     }
 
     suspend fun saveWallpaper(
@@ -42,52 +54,39 @@ class PreferencesRepository(
         offsetX: Float,
         offsetY: Float,
     ) = store.edit {
-        it[Keys.wallpaperUri] = uri
-        it[Keys.wallpaperZoom] = zoom.coerceIn(1f, 5f)
-        it[Keys.wallpaperOffsetX] = offsetX.coerceIn(-1f, 1f)
-        it[Keys.wallpaperOffsetY] = offsetY.coerceIn(-1f, 1f)
+        it[PreferenceKeys.wallpaperUri] = uri
+        it[PreferenceKeys.wallpaperZoom] = zoom.coerceIn(1f, 5f)
+        it[PreferenceKeys.wallpaperOffsetX] = offsetX.coerceIn(-1f, 1f)
+        it[PreferenceKeys.wallpaperOffsetY] = offsetY.coerceIn(-1f, 1f)
     }
 
     suspend fun clearWallpaper() = store.edit {
-        it.remove(Keys.wallpaperUri)
-        it.remove(Keys.wallpaperZoom)
-        it.remove(Keys.wallpaperOffsetX)
-        it.remove(Keys.wallpaperOffsetY)
+        it.remove(PreferenceKeys.wallpaperUri)
+        it.remove(PreferenceKeys.wallpaperZoom)
+        it.remove(PreferenceKeys.wallpaperOffsetX)
+        it.remove(PreferenceKeys.wallpaperOffsetY)
     }
 
     suspend fun resetAppearance() = store.edit {
-        val haptics = it[Keys.haptics] ?: true
+        val haptics = it[PreferenceKeys.haptics] ?: true
         it.clear()
-        it[Keys.haptics] = haptics
+        it[PreferenceKeys.haptics] = haptics
     }
 
     companion object {
-        internal object Keys {
-            val glassIntensity = floatPreferencesKey("glass_intensity")
-            val motionEffects = booleanPreferencesKey("motion_effects")
-            val haptics = booleanPreferencesKey("haptics")
-            val quality = stringPreferencesKey("glass_quality")
-            val theme = stringPreferencesKey("glass_theme")
-            val wallpaperUri = stringPreferencesKey("wallpaper_uri")
-            val wallpaperZoom = floatPreferencesKey("wallpaper_zoom")
-            val wallpaperOffsetX = floatPreferencesKey("wallpaper_offset_x")
-            val wallpaperOffsetY = floatPreferencesKey("wallpaper_offset_y")
-        }
-
         internal fun decode(values: Preferences): AppPreferences = AppPreferences(
-            glassIntensity = (values[Keys.glassIntensity] ?: 0.72f).coerceIn(0.25f, 1f),
-            motionEffects = values[Keys.motionEffects] ?: false,
-            haptics = values[Keys.haptics] ?: true,
-            quality = values[Keys.quality].toEnumOrDefault(GlassQuality.Adaptive),
-            theme = values[Keys.theme].toEnumOrDefault(GlassTheme.Clear),
-            wallpaperUri = values[Keys.wallpaperUri],
-            wallpaperZoom = (values[Keys.wallpaperZoom] ?: 1f).coerceIn(1f, 5f),
-            wallpaperOffsetX = (values[Keys.wallpaperOffsetX] ?: 0f).coerceIn(-1f, 1f),
-            wallpaperOffsetY = (values[Keys.wallpaperOffsetY] ?: 0f).coerceIn(-1f, 1f),
+            glassIntensity = (values[PreferenceKeys.glassIntensity] ?: 0.72f).coerceIn(0.25f, 1f),
+            motionEffects = values[PreferenceKeys.motionEffects] ?: false,
+            haptics = values[PreferenceKeys.haptics] ?: true,
+            quality = values[PreferenceKeys.quality].toEnumOrDefault(GlassQuality.Adaptive),
+            theme = values[PreferenceKeys.theme].toEnumOrDefault(GlassTheme.Clear),
+            wallpaperUri = values[PreferenceKeys.wallpaperUri],
+            wallpaperZoom = (values[PreferenceKeys.wallpaperZoom] ?: 1f).coerceIn(1f, 5f),
+            wallpaperOffsetX = (values[PreferenceKeys.wallpaperOffsetX] ?: 0f).coerceIn(-1f, 1f),
+            wallpaperOffsetY = (values[PreferenceKeys.wallpaperOffsetY] ?: 0f).coerceIn(-1f, 1f),
         )
 
         private inline fun <reified T : Enum<T>> String?.toEnumOrDefault(default: T): T =
             this?.let { value -> enumValues<T>().firstOrNull { it.name == value } } ?: default
     }
 }
-

@@ -10,17 +10,17 @@ import org.junit.Test
 class PreferencesRepositoryTest {
     @Test
     fun storedValuesDecodeIntoSettings() {
-        val values = mutablePreferencesOf(
-            PreferencesRepository.Keys.glassIntensity to 0.86f,
-            PreferencesRepository.Keys.motionEffects to true,
-            PreferencesRepository.Keys.haptics to false,
-            PreferencesRepository.Keys.quality to GlassQuality.Balanced.name,
-            PreferencesRepository.Keys.theme to GlassTheme.DeepBlue.name,
-            PreferencesRepository.Keys.wallpaperUri to "content://wallpaper/1",
-            PreferencesRepository.Keys.wallpaperZoom to 2.2f,
-            PreferencesRepository.Keys.wallpaperOffsetX to -0.4f,
-            PreferencesRepository.Keys.wallpaperOffsetY to 0.3f,
-        )
+        val values = mutablePreferencesOf().apply {
+            this[PreferenceKeys.glassIntensity] = 0.86f
+            this[PreferenceKeys.motionEffects] = true
+            this[PreferenceKeys.haptics] = false
+            this[PreferenceKeys.quality] = GlassQuality.Balanced.name
+            this[PreferenceKeys.theme] = GlassTheme.DeepBlue.name
+            this[PreferenceKeys.wallpaperUri] = "content://wallpaper/1"
+            this[PreferenceKeys.wallpaperZoom] = 2.2f
+            this[PreferenceKeys.wallpaperOffsetX] = -0.4f
+            this[PreferenceKeys.wallpaperOffsetY] = 0.3f
+        }
 
         val decoded = PreferencesRepository.decode(values)
 
@@ -37,10 +37,10 @@ class PreferencesRepositoryTest {
 
     @Test
     fun corruptEnumNamesFallBackSafely() {
-        val values = mutablePreferencesOf(
-            PreferencesRepository.Keys.quality to "impossible",
-            PreferencesRepository.Keys.theme to "missing",
-        )
+        val values = mutablePreferencesOf().apply {
+            this[PreferenceKeys.quality] = "impossible"
+            this[PreferenceKeys.theme] = "missing"
+        }
 
         val decoded = PreferencesRepository.decode(values)
 
@@ -48,4 +48,3 @@ class PreferencesRepositoryTest {
         assertEquals(GlassTheme.Clear, decoded.theme)
     }
 }
-
